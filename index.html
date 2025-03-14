@@ -3,91 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mold Tracker</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Mold Tracking</title>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2 class="text-center">Mold Tracker</h2>
-        
-        <form id="moldForm" class="mb-4">
-            <div class="row g-3">
-                <div class="col-md-2">
-                    <select id="moldPrefix" class="form-select" required>
-                        <option value="E603C">E603C</option>
-                        <option value="MEB">MEB</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select id="moldMiddle" class="form-select" required>
-                        <option value="CNM">CNM</option>
-                        <option value="ANM">ANM</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <input type="text" id="moldSuffix" class="form-control" placeholder="Number" required>
-                </div>
-                <div class="col-md-2">
-                    <input type="text" id="machineNumber" class="form-control" placeholder="Machine Number" required>
-                </div>
-                <div class="col-md-2">
-                    <select id="status" class="form-select" required>
-                        <option value="Under Repair">Under Repair</option>
-                        <option value="Repaired">Repaired</option>
-                        <option value="Inspection">Inspection</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select id="maintenance" class="form-select" required>
-                        <option value="In">In</option>
-                        <option value="Out">Out</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="datetime-local" id="maintenanceDateTime" class="form-control" required>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Add Mold</button>
-                </div>
-            </div>
-        </form>
-        
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Mold ID</th>
-                    <th>Machine Number</th>
-                    <th>Status</th>
-                    <th>Maintenance</th>
-                    <th>Maintenance Date & Time</th>
-                </tr>
-            </thead>
-            <tbody id="moldTableBody">
-                <tr>
-                    <td>E603C-CNM-1</td>
-                    <td>Machine-10</td>
-                    <td>Under Repair</td>
-                    <td>In</td>
-                    <td>2025-03-10T14:30</td>
-                </tr>
-                <tr>
-                    <td>MEB-ANM-2</td>
-                    <td>Machine-12</td>
-                    <td>Repaired</td>
-                    <td>Out</td>
-                    <td>2025-03-08T10:15</td>
-                </tr>
-                <tr>
-                    <td>E603C-ANM-3</td>
-                    <td>Machine-15</td>
-                    <td>Inspection</td>
-                    <td>In</td>
-                    <td>2025-03-12T09:45</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <h2>Mold Tracking Form</h2>
+    <form id="moldForm">
+        <label for="moldPrefix">Mold Prefix:</label>
+        <select id="moldPrefix">
+            <option value="E603C">E603C</option>
+            <option value="MEB">MEB</option>
+        </select>
+
+        <label for="moldMiddle">Mold Middle:</label>
+        <select id="moldMiddle">
+            <option value="CNM">CNM</option>
+            <option value="ANM">ANM</option>
+        </select>
+
+        <label for="moldSuffix">Mold Suffix:</label>
+        <input type="text" id="moldSuffix" required="">
+
+        <label for="machineNumber">Machine Number:</label>
+        <input type="text" id="machineNumber" required="">
+
+        <label for="status">Status:</label>
+        <select id="status">
+            <option value="Repairing">Repairing</option>
+            <option value="Completed">Completed</option>
+            <option value="Inspection">Inspection</option>
+        </select>
+
+        <label for="maintenance">Maintenance:</label>
+        <input type="text" id="maintenance" required="">
+
+        <label for="maintenanceDateTime">Maintenance Date &amp; Time:</label>
+        <input type="datetime-local" id="maintenanceDateTime" required="">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Mold Data</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Mold ID</th>
+                <th>Machine Number</th>
+                <th>Status</th>
+                <th>Maintenance</th>
+                <th>Maintenance Date</th>
+            </tr>
+        </thead>
+        <tbody id="moldTableBody"></tbody>
+    </table>
 
     <script src="script.js"></script>
+
 </body>
 </html>
