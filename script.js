@@ -4,9 +4,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const editFormContainer = document.getElementById('editFormContainer');
     const editMoldForm = document.getElementById('editMoldForm');
 
+    // API 기본 URL 설정
+    const API_BASE_URL = 'https://mold-track-f3c6ebab02f9.herokuapp.com'; // 실제 Heroku 앱 주소
+
     // 데이터 로드 함수
     function loadMolds() {
-        fetch('http://localhost:3002/get-molds')  // 백엔드 API 주소
+        fetch(`${API_BASE_URL}/get-molds`)
             .then(response => response.json())
             .then(data => {
                 moldTableBody.innerHTML = '';
@@ -30,7 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     deleteButton.addEventListener('click', () => deleteMold(mold.mold_id));  // 삭제 함수 호출
                     actionsCell.appendChild(deleteButton);
                 });
-            });
+            })
+            .catch(error => console.error('Error fetching data:', error));
     }
 
     // 폼 제출 이벤트 처리
@@ -55,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
             maintenance_date: maintenanceDateTime
         };
 
-        fetch('http://localhost:3002/add-mold', {  // 백엔드 API 주소
+        fetch(`${API_BASE_URL}/add-mold`, {  // 백엔드 API 주소
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -67,19 +71,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log(data);
                 loadMolds();  // 테이블 업데이트
                 moldForm.reset();  // 폼 초기화
-            });
+            })
+            .catch(error => console.error('Error:', error));
     });
 
     // 삭제 함수
     function deleteMold(moldId) {
-        fetch(`http://localhost:3002/delete-mold/${moldId}`, {  // 백엔드 API 주소
+        fetch(`${API_BASE_URL}/delete-mold/${moldId}`, {  // 백엔드 API 주소
             method: 'DELETE'
         })
             .then(response => response.json())
             .then(data => {
                 console.log(data);
                 loadMolds();  // 테이블 업데이트
-            });
+            })
+            .catch(error => console.error('Error:', error));
     }
 
     // 수정 폼 표시 함수
@@ -96,9 +102,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 수정 폼 숨기기 함수
-    window.hideEditForm = function () {
+    function hideEditForm() {
         editFormContainer.style.display = 'none';
     }
+
+    // 수정 폼 숨기기 함수 (전역 스코프 제거)
+    // window.hideEditForm = function () {
+    //     editFormContainer.style.display = 'none';
+    // }
 
     // 수정 함수
     editMoldForm.addEventListener('submit', function (event) {
@@ -112,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
             maintenance_date: document.getElementById('editMaintenanceDateTime').value
         };
 
-        fetch(`http://localhost:3002/update-mold/${moldId}`, {  // 백엔드 API 주소
+        fetch(`${API_BASE_URL}/update-mold/${moldId}`, {  // 백엔드 API 주소
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -124,7 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log(data);
                 loadMolds();  // 테이블 업데이트
                 hideEditForm();  // 폼 숨기기
-            });
+            })
+            .catch(error => console.error('Error:', error));
     });
 
     // 초기 데이터 로드
