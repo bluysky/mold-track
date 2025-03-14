@@ -1,77 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    </head>
+    <body>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mold Tracking</title>
     <style>
+        /* 기본적인 스타일 (필요에 따라 수정) */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 10px;
-            max-width: 600px;
-            margin: auto;
         }
-
-        h2 {
-            text-align: center;
+        table {
+            border-collapse: collapse;
+            width: 100%;
         }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
         }
-
-        label {
-            font-weight: bold;
+        th {
+            background-color: #f2f2f2;
         }
-
-        input, select, button {
-            font-size: 16px;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
         button {
-            background-color: #007bff;
-            color: white;
-            border: none;
             cursor: pointer;
         }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 8px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        /* 수정 폼 스타일 */
-        #editFormContainer {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
     </style>
-</head>
-<body>
+<>
     <h2>Mold Tracking Form</h2>
     <form id="moldForm">
         <label for="moldPrefix">Mold Prefix:</label>
@@ -117,39 +75,124 @@
                 <th>Status</th>
                 <th>Maintenance</th>
                 <th>Maintenance Date</th>
-                <th>Actions</th>
+                <th>Actions</th> <!-- 수정/삭제 버튼을 위한 열 -->
             </tr>
         </thead>
         <tbody id="moldTableBody"></tbody>
     </table>
 
-    <!-- 수정 폼 -->
-    <div id="editFormContainer">
-        <h2>Edit Mold</h2>
-        <form id="editMoldForm">
-            <label for="editMachineNumber">Machine Number:</label>
-            <input type="text" id="editMachineNumber" required="">
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const moldForm = document.getElementById('moldForm');
+        const moldTableBody = document.getElementById('moldTableBody');
 
-            <label for="editStatus">Status:</label>
-            <select id="editStatus">
-                <option value="Repairing">Repairing</option>
-                <option value="Completed">Completed</option>
-                <option value="Inspection">Inspection</option>
-            </select>
+        // API 기본 URL 설정
+        const API_BASE_URL = 'https://mold-track-f3c6ebab02f9.herokuapp.com'; // 실제 Heroku 앱 주소
 
-            <label for="editMaintenance">Maintenance:</label>
-            <input type="text" id="editMaintenance" required="">
+        // 데이터 로드 함수 (API 엔드포인트에 맞게 수정 필요)
+        function loadMolds() {
+            fetch(`${API_BASE_URL}/get-molds`)
+                .then(response => response.json())
+                .then(data => {
+                    moldTableBody.innerHTML = ''; // 테이블 내용 초기화
+                    data.forEach(mold => {
+                        let row = moldTableBody.insertRow();
+                        let moldIdCell = row.insertCell();
+                        moldIdCell.textContent = mold.mold_id;
+                        let machineNumberCell = row.insertCell();
+                        machineNumberCell.textContent = mold.machine_number;
+                        let statusCell = row.insertCell();
+                        statusCell.textContent = mold.status;
+                        let maintenanceCell = row.insertCell();
+                        maintenanceCell.textContent = mold.maintenance;
+                        let maintenanceDateCell = row.insertCell();
+                        maintenanceDateCell.textContent = mold.maintenance_date;
 
-            <label for="editMaintenanceDateTime">Maintenance Date & Time:</label>
-            <input type="datetime-local" id="editMaintenanceDateTime" required="">
+                        // Actions 셀 생성 및 버튼 추가
+                        let actionsCell = row.insertCell();
 
-            <input type="hidden" id="editMoldId">  <!-- 수정할 Mold ID -->
+                        // Edit 버튼 생성 및 추가
+                        let editButton = document.createElement('button');
+                        editButton.textContent = 'Edit';
+                        editButton.onclick = function() {
+                            editMold(mold.mold_id); // 수정 함수 호출 (구현 필요)
+                        };
+                        actionsCell.appendChild(editButton);
 
-            <button type="submit">Update</button>
-            <button type="button" onclick="hideEditForm()">Cancel</button>
-        </form>
-    </div>
+                        // Delete 버튼 생성 및 추가
+                        let deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = function() {
+                            deleteMold(mold.mold_id); // 삭제 함수 호출 (구현 필요)
+                        };
+                        actionsCell.appendChild(deleteButton);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
 
-    <script src="script.js"></script>
+        // 폼 제출 이벤트 처리
+        moldForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // 페이지 리로드 방지
+
+            // 폼 데이터 가져오기
+            const moldPrefix = document.getElementById('moldPrefix').value;
+            const moldMiddle = document.getElementById('moldMiddle').value;
+            const moldSuffix = document.getElementById('moldSuffix').value;
+            const moldId = moldPrefix + moldMiddle + moldSuffix;
+            const machineNumber = document.getElementById('machineNumber').value;
+            const status = document.getElementById('status').value;
+            const maintenance = document.getElementById('maintenance').value;
+            const maintenanceDateTime = document.getElementById('maintenanceDateTime').value;
+
+            // 데이터 객체 생성
+            const moldData = {
+                mold_id: moldId,
+                machine_number: machineNumber,
+                status: status,
+                maintenance: maintenance,
+                maintenance_date: maintenanceDateTime
+            };
+
+            // API 호출
+            fetch(`${API_BASE_URL}/add-mold`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(moldData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                loadMolds(); // 데이터 로드
+                moldForm.reset(); // 폼 초기화
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // 삭제 함수
+        function deleteMold(moldId) {
+            fetch(`${API_BASE_URL}/delete-mold/${moldId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                loadMolds(); // 데이터 다시 로드
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // 수정 함수 (구현 필요)
+        function editMold(moldId) {
+            console.log(`Edit mold with ID: ${moldId}`);
+            alert('Edit 기능은 아직 구현 중입니다.');
+        }
+
+        // 초기 데이터 로드
+        loadMolds();
+    });
+</script>
 </body>
 </html>
