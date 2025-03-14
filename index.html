@@ -4,64 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mold Tracking</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 10px;
-        max-width: 600px;
-        margin: auto;
-    }
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            max-width: 600px;
+            margin: auto;
+        }
 
-    h2 {
-        text-align: center;
-    }
+        h2 {
+            text-align: center;
+        }
 
-    form {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-    label {
-        font-weight: bold;
-    }
+        label {
+            font-weight: bold;
+        }
 
-    input, select, button {
-        font-size: 16px;
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
+        input, select, button {
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
 
-    button {
-        background-color: #007bff;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
 
-    button:hover {
-        background-color: #0056b3;
-    }
+        button:hover {
+            background-color: #0056b3;
+        }
 
-    table {
-        width: 100%;
-        margin-top: 20px;
-        border-collapse: collapse;
-    }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
 
-    th, td {
-        padding: 8px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
 
-    th {
-        background-color: #f4f4f4;
-    }
-</style>
-    
+        th {
+            background-color: #f4f4f4;
+        }
+
+        /* 수정 폼 스타일 */
+        #editFormContainer {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <h2>Mold Tracking Form</h2>
@@ -94,7 +102,7 @@
         <label for="maintenance">Maintenance:</label>
         <input type="text" id="maintenance" required="">
 
-        <label for="maintenanceDateTime">Maintenance Date &amp; Time:</label>
+        <label for="maintenanceDateTime">Maintenance Date & Time:</label>
         <input type="datetime-local" id="maintenanceDateTime" required="">
 
         <button type="submit">Submit</button>
@@ -103,20 +111,45 @@
     <h2>Mold Data</h2>
     <table border="1">
         <thead>
-    <tr>
-        <th>Mold ID</th>
-        <th>Machine Number</th>
-        <th>Status</th>
-        <th>Maintenance</th>
-        <th>Maintenance Date</th>
-        <th>Actions</th>
-    </tr>
-       </thead>
-       <tbody id="moldTableBody"></tbody>
-
+            <tr>
+                <th>Mold ID</th>
+                <th>Machine Number</th>
+                <th>Status</th>
+                <th>Maintenance</th>
+                <th>Maintenance Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="moldTableBody"></tbody>
     </table>
 
-    <script src="script.js"></script>
+    <!-- 수정 폼 -->
+    <div id="editFormContainer">
+        <h2>Edit Mold</h2>
+        <form id="editMoldForm">
+            <label for="editMachineNumber">Machine Number:</label>
+            <input type="text" id="editMachineNumber" required="">
 
+            <label for="editStatus">Status:</label>
+            <select id="editStatus">
+                <option value="Repairing">Repairing</option>
+                <option value="Completed">Completed</option>
+                <option value="Inspection">Inspection</option>
+            </select>
+
+            <label for="editMaintenance">Maintenance:</label>
+            <input type="text" id="editMaintenance" required="">
+
+            <label for="editMaintenanceDateTime">Maintenance Date & Time:</label>
+            <input type="datetime-local" id="editMaintenanceDateTime" required="">
+
+            <input type="hidden" id="editMoldId">  <!-- 수정할 Mold ID -->
+
+            <button type="submit">Update</button>
+            <button type="button" onclick="hideEditForm()">Cancel</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
