@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     const moldForm = document.getElementById('moldForm');
     const moldTableBody = document.getElementById('moldTableBody');
+    const editFormContainer = document.getElementById('editFormContainer');
+    const editMoldForm = document.getElementById('editMoldForm');
 
     // 데이터 로드 함수
     function loadMolds() {
@@ -80,17 +82,36 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // 수정 폼 표시 함수 (구현 필요)
+    // 수정 폼 표시 함수
     function showEditForm(mold) {
-        // 여기에 수정 폼을 표시하고, 데이터를 폼에 채우는 코드를 작성합니다.
-        // 수정 폼은 HTML에 추가하거나, JavaScript로 동적으로 생성할 수 있습니다.
-        // 폼 제출 시 updateMold() 함수를 호출하여 백엔드에 수정 요청을 보냅니다.
-        console.log('Edit mold:', mold);
-        alert('Edit 기능은 아직 구현 중입니다.');  // 임시 알림
+        // 폼 필드에 데이터 채우기
+        document.getElementById('editMachineNumber').value = mold.machine_number;
+        document.getElementById('editStatus').value = mold.status;
+        document.getElementById('editMaintenance').value = mold.maintenance;
+        document.getElementById('editMaintenanceDateTime').value = mold.maintenance_date;
+        document.getElementById('editMoldId').value = mold.mold_id;  // Mold ID 설정
+
+        // 폼 표시
+        editFormContainer.style.display = 'block';
     }
 
-    // 수정 함수 (구현 필요)
-    function updateMold(moldId, updatedData) {
+    // 수정 폼 숨기기 함수
+    window.hideEditForm = function () {
+        editFormContainer.style.display = 'none';
+    }
+
+    // 수정 함수
+    editMoldForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const moldId = document.getElementById('editMoldId').value;  // Mold ID 가져오기
+        const updatedData = {
+            machine_number: document.getElementById('editMachineNumber').value,
+            status: document.getElementById('editStatus').value,
+            maintenance: document.getElementById('editMaintenance').value,
+            maintenance_date: document.getElementById('editMaintenanceDateTime').value
+        };
+
         fetch(`http://localhost:3002/update-mold/${moldId}`, {  // 백엔드 API 주소
             method: 'PUT',
             headers: {
@@ -102,8 +123,9 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 console.log(data);
                 loadMolds();  // 테이블 업데이트
+                hideEditForm();  // 폼 숨기기
             });
-    }
+    });
 
     // 초기 데이터 로드
     loadMolds();
