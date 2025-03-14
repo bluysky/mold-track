@@ -1,79 +1,83 @@
-const express = require("express");
-const cors = require("cors");
-const sqlite3 = require("sqlite3").verbose();
+// 데이터 불러와서 테이블 업데이트 (수정/삭제 버튼 추가)
+function loadMolds() {
+    fetch("http://localhost:3000/get-molds")
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById("moldTableBody");
+            tableBody.innerHTML = ""; // 기존 데이터 초기화
 
-const app = express();
-const port = process.env.PORT || 3002;  // 로컬에서는 3002 포트를 사용
+            data.forEach(mold => {
+                const row = `<tr>
+                    <td>${mold.mold_id}</td>
+                    <td>${mold.machine_number}</td>
+                    <td>${mold.status}</td>
+                    <td>${mold.maintenance}</td>
+                    <td>${mold.maintenance_date}</td>
+                    <td>
+                        <button onclick="editMold('${mold.mold_id}', '${mold.machine_number}', '${mold.status}', '${mold.maintenance}', '${mold.maintenance_date}')">Edit</button>
+                        <button onclick="deleteMold('${mold.mold_id}')">Delete</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        })
+        .catch(error => console.error("Error loading molds:", error));
+}
 
-app.use(cors());
-app.use(express.json());
+// 수정 버튼 클릭 시 폼에 데이터 채우기
+function editMold(mold_id, machine_number, status, maintenance, maintenance_date) {
+    document.getElementById("moldPrefix").value = mold_id.split("-")[0];
+    document.getElementById("moldMiddle").value = mold_id.split("-")[1];
+    document.getElementById("moldSuffix").value = mold_id.split("-")[2];
+    document.getElementById("machineNumber").value = machine_number;
+    document.getElementById("status").value = status;
+    document.getElementById("maintenance").value = maintenance;
+    document.getElementById("maintenanceDateTime").value = maintenance_date;
 
-const db = new sqlite3.Database("mold_tracking.db", (err) => {
-    if (err) {
-        console.error("Database connection error:", err.message);
-    } else {
-        console.log("Connected to the SQLite database.");
-        db.run(`CREATE TABLE IF NOT EXISTS molds (
-            mold_id TEXT PRIMARY KEY,
-            machine_number TEXT,
-            status TEXT,
-            maintenance TEXT,
-            maintenance_date TEXT
-        )`);
+    // 기존 이벤트 리스너 제거 후 새 이벤트 리스너 추가
+    const form = document.getElementById("moldForm");
+    form.onsubmit = function (event) {
+        event.preventDefault();
+        updateMold(mold_id);
+    };
+}
+
+// 수정 요청 보내기
+function updateMold(mold_id) {
+    const machine_number = document.getElementById("machineNumber").value;
+    const status = document.getElementById("status").value;
+    const maintenance = document.getElementById("maintenance").value;
+    const maintenance_date = document.getElementById("maintenanceDateTime").value;
+
+    fetch(`http://localhost:3000/update-mold/${mold_id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ machine_number, status, maintenance, maintenance_date })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Mold updated:", data);
+        loadMolds(); // 데이터 다시 불러오기
+    })
+    .catch(error => console.error("Error updating mold:", error));
+}
+
+// 삭제 요청 보내기
+function deleteMold(mold_id) {
+    if (confirm("정말 삭제하시겠습니까?")) {
+        fetch(`http://localhost:3000/delete-mold/${mold_id}`, {
+            method: "DELETE"
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Mold deleted:", data);
+            loadMolds(); // 데이터 다시 불러오기
+        })
+        .catch(error => console.error("Error deleting mold:", error));
     }
-});
+}
 
-// 데이터 추가 (Create)
-app.post("/add-mold", (req, res) => {
-    const { mold_id, machine_number, status, maintenance, maintenance_date } = req.body;
-    const query = `INSERT INTO molds (mold_id, machine_number, status, maintenance, maintenance_date) VALUES (?, ?, ?, ?, ?)`;
-    
-    db.run(query, [mold_id, machine_number, status, maintenance, maintenance_date], (err) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json({ message: "Mold added successfully" });
-    });
-});
-
-// 모든 데이터 조회 (Read)
-app.get("/get-molds", (req, res) => {
-    db.all("SELECT * FROM molds", [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json(rows);
-    });
-});
-
-// 데이터 수정 (Update)
-app.put("/update-mold/:id", (req, res) => {
-    const { machine_number, status, maintenance, maintenance_date } = req.body;
-    const mold_id = req.params.id;
-    const query = `UPDATE molds SET machine_number = ?, status = ?, maintenance = ?, maintenance_date = ? WHERE mold_id = ?`;
-    
-    db.run(query, [machine_number, status, maintenance, maintenance_date, mold_id], function (err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json({ message: "Mold updated successfully" });
-    });
-});
-
-// 데이터 삭제 (Delete)
-app.delete("/delete-mold/:id", (req, res) => {
-    const mold_id = req.params.id;
-    const query = `DELETE FROM molds WHERE mold_id = ?`;
-    
-    db.run(query, mold_id, function (err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json({ message: "Mold deleted successfully" });
-    });
-});
-
-// 서버 실행
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
+// 페이지 로드 시 데이터 불러오기
+document.addEventListener("DOMContentLoaded", loadMolds);
