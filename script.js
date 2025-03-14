@@ -1,83 +1,110 @@
-// 데이터 불러와서 테이블 업데이트 (수정/삭제 버튼 추가)
-function loadMolds() {
-    fetch("http://localhost:3000/get-molds")
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById("moldTableBody");
-            tableBody.innerHTML = ""; // 기존 데이터 초기화
+document.addEventListener('DOMContentLoaded', function () {
+    const moldForm = document.getElementById('moldForm');
+    const moldTableBody = document.getElementById('moldTableBody');
 
-            data.forEach(mold => {
-                const row = `<tr>
-                    <td>${mold.mold_id}</td>
-                    <td>${mold.machine_number}</td>
-                    <td>${mold.status}</td>
-                    <td>${mold.maintenance}</td>
-                    <td>${mold.maintenance_date}</td>
-                    <td>
-                        <button onclick="editMold('${mold.mold_id}', '${mold.machine_number}', '${mold.status}', '${mold.maintenance}', '${mold.maintenance_date}')">Edit</button>
-                        <button onclick="deleteMold('${mold.mold_id}')">Delete</button>
-                    </td>
-                </tr>`;
-                tableBody.innerHTML += row;
+    // 데이터 로드 함수
+    function loadMolds() {
+        fetch('http://localhost:3002/get-molds')  // 백엔드 API 주소
+            .then(response => response.json())
+            .then(data => {
+                moldTableBody.innerHTML = '';
+                data.forEach(mold => {
+                    const row = moldTableBody.insertRow();
+                    row.insertCell().textContent = mold.mold_id;
+                    row.insertCell().textContent = mold.machine_number;
+                    row.insertCell().textContent = mold.status;
+                    row.insertCell().textContent = mold.maintenance;
+                    row.insertCell().textContent = mold.maintenance_date;
+
+                    // 수정 및 삭제 버튼 추가
+                    const actionsCell = row.insertCell();
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.addEventListener('click', () => showEditForm(mold));  // 수정 폼 표시 함수 호출
+                    actionsCell.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => deleteMold(mold.mold_id));  // 삭제 함수 호출
+                    actionsCell.appendChild(deleteButton);
+                });
             });
-        })
-        .catch(error => console.error("Error loading molds:", error));
-}
-
-// 수정 버튼 클릭 시 폼에 데이터 채우기
-function editMold(mold_id, machine_number, status, maintenance, maintenance_date) {
-    document.getElementById("moldPrefix").value = mold_id.split("-")[0];
-    document.getElementById("moldMiddle").value = mold_id.split("-")[1];
-    document.getElementById("moldSuffix").value = mold_id.split("-")[2];
-    document.getElementById("machineNumber").value = machine_number;
-    document.getElementById("status").value = status;
-    document.getElementById("maintenance").value = maintenance;
-    document.getElementById("maintenanceDateTime").value = maintenance_date;
-
-    // 기존 이벤트 리스너 제거 후 새 이벤트 리스너 추가
-    const form = document.getElementById("moldForm");
-    form.onsubmit = function (event) {
-        event.preventDefault();
-        updateMold(mold_id);
-    };
-}
-
-// 수정 요청 보내기
-function updateMold(mold_id) {
-    const machine_number = document.getElementById("machineNumber").value;
-    const status = document.getElementById("status").value;
-    const maintenance = document.getElementById("maintenance").value;
-    const maintenance_date = document.getElementById("maintenanceDateTime").value;
-
-    fetch(`http://localhost:3000/update-mold/${mold_id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ machine_number, status, maintenance, maintenance_date })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Mold updated:", data);
-        loadMolds(); // 데이터 다시 불러오기
-    })
-    .catch(error => console.error("Error updating mold:", error));
-}
-
-// 삭제 요청 보내기
-function deleteMold(mold_id) {
-    if (confirm("정말 삭제하시겠습니까?")) {
-        fetch(`http://localhost:3000/delete-mold/${mold_id}`, {
-            method: "DELETE"
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Mold deleted:", data);
-            loadMolds(); // 데이터 다시 불러오기
-        })
-        .catch(error => console.error("Error deleting mold:", error));
     }
-}
 
-// 페이지 로드 시 데이터 불러오기
-document.addEventListener("DOMContentLoaded", loadMolds);
+    // 폼 제출 이벤트 처리
+    moldForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const moldPrefix = document.getElementById('moldPrefix').value;
+        const moldMiddle = document.getElementById('moldMiddle').value;
+        const moldSuffix = document.getElementById('moldSuffix').value;
+        const moldId = moldPrefix + moldMiddle + moldSuffix;  // Mold ID 생성
+
+        const machineNumber = document.getElementById('machineNumber').value;
+        const status = document.getElementById('status').value;
+        const maintenance = document.getElementById('maintenance').value;
+        const maintenanceDateTime = document.getElementById('maintenanceDateTime').value;
+
+        const moldData = {
+            mold_id: moldId,  // Mold ID 추가
+            machine_number: machineNumber,
+            status: status,
+            maintenance: maintenance,
+            maintenance_date: maintenanceDateTime
+        };
+
+        fetch('http://localhost:3002/add-mold', {  // 백엔드 API 주소
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(moldData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                loadMolds();  // 테이블 업데이트
+                moldForm.reset();  // 폼 초기화
+            });
+    });
+
+    // 삭제 함수
+    function deleteMold(moldId) {
+        fetch(`http://localhost:3002/delete-mold/${moldId}`, {  // 백엔드 API 주소
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                loadMolds();  // 테이블 업데이트
+            });
+    }
+
+    // 수정 폼 표시 함수 (구현 필요)
+    function showEditForm(mold) {
+        // 여기에 수정 폼을 표시하고, 데이터를 폼에 채우는 코드를 작성합니다.
+        // 수정 폼은 HTML에 추가하거나, JavaScript로 동적으로 생성할 수 있습니다.
+        // 폼 제출 시 updateMold() 함수를 호출하여 백엔드에 수정 요청을 보냅니다.
+        console.log('Edit mold:', mold);
+        alert('Edit 기능은 아직 구현 중입니다.');  // 임시 알림
+    }
+
+    // 수정 함수 (구현 필요)
+    function updateMold(moldId, updatedData) {
+        fetch(`http://localhost:3002/update-mold/${moldId}`, {  // 백엔드 API 주소
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                loadMolds();  // 테이블 업데이트
+            });
+    }
+
+    // 초기 데이터 로드
+    loadMolds();
+});
